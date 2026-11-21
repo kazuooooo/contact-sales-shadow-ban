@@ -1,0 +1,5 @@
+{
+  "domains": ["example-sales.co.jp"],
+  "redirectUrl": "/thanks",
+  "emailSelector": "input[type=\"email\"]"
+}

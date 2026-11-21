@@ -1,0 +1,88 @@
+{
+  "exportFormatVersion": 2,
+  "exportTime": "2026-11-21 04:10:06",
+  "containerVersion": {
+    "path": "accounts/0/containers/0/versions/0",
+    "accountId": "0",
+    "containerId": "0",
+    "containerVersionId": "0",
+    "tag": [
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "tagId": "1",
+        "name": "営業ブロック - フォーム送信ブロック",
+        "type": "html",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "html",
+            "value": "<script>\n/*\n * contact-sales-shadow-ban\n * メールアドレスのドメインがブラックリストに一致したら、フォームを送信せずに完了ページへリダイレクトする。\n * 設定は GTM の定数変数から読み込む（README.md 参照）。\n * 何らかのエラーが起きた場合は通常どおり送信される（fail-open）。\n */\n(function () {\n  var CONFIG = {\n    domains:       '{{営業ブロック - ドメイン}}',\n    redirectUrl:   '{{営業ブロック - 完了URL}}',\n    emailSelector: '{{営業ブロック - メールセレクタ}}' || 'input[type=\"email\"]'\n  };\n\n  var blocklist = String(CONFIG.domains || '').split(/[\\s,]+/).map(function (d) {\n    return d.trim().toLowerCase().replace(/^@/, '');\n  }).filter(function (d) { return d && d.indexOf('.') > 0; });\n\n  function isBlocked(form) {\n    var el = form.querySelector(CONFIG.emailSelector);\n    if (!el) return false;\n    var v = String(el.value || '').normalize('NFKC').trim().toLowerCase();\n    var at = v.lastIndexOf('@');\n    if (at < 0) return false;\n    var dom = v.slice(at + 1);\n    return blocklist.some(function (d) {\n      return dom === d || dom.slice(-(d.length + 1)) === '.' + d; // サブドメインも対象\n    });\n  }\n\n  function handler(e) {\n    var form = e.target.closest && e.target.closest('form');\n    if (!form) return;\n    if (e.type === 'click' && !e.target.closest('button, [type=\"submit\"]')) return;\n    try { if (!isBlocked(form)) return; } catch (_) { return; } // 何かあれば通常送信\n    e.preventDefault();\n    e.stopImmediatePropagation();\n    location.href = CONFIG.redirectUrl || '/';\n  }\n\n  document.addEventListener('click', handler, true);\n  document.addEventListener('submit', handler, true);\n})();\n</script>\n"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "supportDocumentWrite",
+            "value": "false"
+          }
+        ],
+        "firingTriggerId": [
+          "2"
+        ],
+        "tagFiringOption": "ONCE_PER_EVENT"
+      }
+    ],
+    "trigger": [
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "triggerId": "2",
+        "name": "営業ブロック - DOM Ready",
+        "type": "DOM_READY"
+      }
+    ],
+    "variable": [
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "variableId": "3",
+        "name": "営業ブロック - ドメイン",
+        "type": "c",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "value",
+            "value": "example-sales.co.jp"
+          }
+        ]
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "variableId": "4",
+        "name": "営業ブロック - 完了URL",
+        "type": "c",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "value",
+            "value": "/thanks"
+          }
+        ]
+      },
+      {
+        "accountId": "0",
+        "containerId": "0",
+        "variableId": "5",
+        "name": "営業ブロック - メールセレクタ",
+        "type": "c",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "value",
+            "value": "input[type=\"email\"]"
+          }
+        ]
+      }
+    ]
+  }
+}

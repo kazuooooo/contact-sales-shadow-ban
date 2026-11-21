@@ -1,0 +1,44 @@
+<script>
+/*
+ * contact-sales-shadow-ban
+ * メールアドレスのドメインがブラックリストに一致したら、フォームを送信せずに完了ページへリダイレクトする。
+ * 設定は GTM の定数変数から読み込む（README.md 参照）。
+ * 何らかのエラーが起きた場合は通常どおり送信される（fail-open）。
+ */
+(function () {
+  var CONFIG = {
+    domains:       '{{営業ブロック - ドメイン}}',
+    redirectUrl:   '{{営業ブロック - 完了URL}}',
+    emailSelector: '{{営業ブロック - メールセレクタ}}' || 'input[type="email"]'
+  };
+
+  var blocklist = String(CONFIG.domains || '').split(/[\s,]+/).map(function (d) {
+    return d.trim().toLowerCase().replace(/^@/, '');
+  }).filter(function (d) { return d && d.indexOf('.') > 0; });
+
+  function isBlocked(form) {
+    var el = form.querySelector(CONFIG.emailSelector);
+    if (!el) return false;
+    var v = String(el.value || '').normalize('NFKC').trim().toLowerCase();
+    var at = v.lastIndexOf('@');
+    if (at < 0) return false;
+    var dom = v.slice(at + 1);
+    return blocklist.some(function (d) {
+      return dom === d || dom.slice(-(d.length + 1)) === '.' + d; // サブドメインも対象
+    });
+  }
+
+  function handler(e) {
+    var form = e.target.closest && e.target.closest('form');
+    if (!form) return;
+    if (e.type === 'click' && !e.target.closest('button, [type="submit"]')) return;
+    try { if (!isBlocked(form)) return; } catch (_) { return; } // 何かあれば通常送信
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    location.href = CONFIG.redirectUrl || '/';
+  }
+
+  document.addEventListener('click', handler, true);
+  document.addEventListener('submit', handler, true);
+})();
+</script>

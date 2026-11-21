@@ -1,0 +1,11 @@
+{
+  "name": "contact-sales-shadow-ban",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "GTMだけでフォーム送信を特定ドメインからブロックするスクリプト",
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  },
+  "engines": { "node": ">=18" }
+}
