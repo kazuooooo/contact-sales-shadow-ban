@@ -1,5 +1,5 @@
 {
-  "domains": ["example-sales.co.jp"],
+  "domains": ["example-sales.co.jp", "sales-bot@example.net"],
   "redirectUrl": "/thanks",
   "emailSelector": "input[type=\"email\"]"
 }

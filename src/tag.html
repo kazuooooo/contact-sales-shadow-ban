@@ -2,12 +2,13 @@
 /*
  * contact-sales-shadow-ban
  * メールアドレスのドメインがブラックリストに一致したら、フォームを送信せずに完了ページへリダイレクトする。
- * 設定は GTM の定数変数から読み込む（README.md 参照）。
+ * 設定は GTM の変数から読み込む（README.md 参照）。
  * 何らかのエラーが起きた場合は通常どおり送信される（fail-open）。
  */
 (function () {
   var CONFIG = {
-    domains:       '{{営業ブロック - ドメイン}}',
+    // 定数の変数は 1024 文字までなので、ドメインはカスタム JavaScript の変数（配列を返す）で持つ。文字列でも動く
+    domains:       {{営業ブロック - ドメイン}},
     redirectUrl:   '{{営業ブロック - 完了URL}}',
     emailSelector: '{{営業ブロック - メールセレクタ}}' || 'input[type="email"]'
   };
@@ -24,18 +25,42 @@
     if (at < 0) return false;
     var dom = v.slice(at + 1);
     return blocklist.some(function (d) {
+      if (d.indexOf('@') > 0) return v === d; // 「name@gmail.com」のように書いたものはアドレス単位
       return dom === d || dom.slice(-(d.length + 1)) === '.' + d; // サブドメインも対象
     });
+  }
+
+  // 完了 URL は「/thanks」のように 1 つだけ書くと全ページ共通になる。
+  // 「/contact=/contact/completed, /support=/support/completed」のようにページごとに書くと、
+  // 書いたページのフォームだけが対象になる（書いていないページでは何もしない）。
+  function redirectFor(path) {
+    var norm = function (p) { return p.replace(/\/+$/, '') || '/'; };
+    var common = '', hit = '';
+    String(CONFIG.redirectUrl || '').split(/[,\n]+/).forEach(function (s) {
+      s = s.trim();
+      var i = s.indexOf('=');
+      var key = i > 0 ? s.slice(0, i).trim() : '';
+      if (key.charAt(0) === '/' && key.indexOf('?') < 0) {
+        if (!hit && norm(key) === norm(path)) hit = s.slice(i + 1).trim();
+      } else if (s && !common) {
+        common = s;
+      }
+    });
+    return hit || common;
   }
 
   function handler(e) {
     var form = e.target.closest && e.target.closest('form');
     if (!form) return;
     if (e.type === 'click' && !e.target.closest('button, [type="submit"]')) return;
-    try { if (!isBlocked(form)) return; } catch (_) { return; } // 何かあれば通常送信
+    var url;
+    try {
+      url = redirectFor(location.pathname);
+      if (!url || !isBlocked(form)) return;
+    } catch (_) { return; } // 何かあれば通常送信
     e.preventDefault();
     e.stopImmediatePropagation();
-    location.href = CONFIG.redirectUrl || '/';
+    location.href = url;
   }
 
   document.addEventListener('click', handler, true);
