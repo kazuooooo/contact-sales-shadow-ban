@@ -22,10 +22,10 @@
 
 ## 未確認のこと（このセッションでやること）
 
-- [ ] `gtm/container.json` が実際の GTM にインポートできるか（GTM のエクスポート形式に合わせて手書きしたもので、まだ一度も試していない）
-- [ ] 実際の STUDIO のフォームで、セレクタ `input[type="email"]` が合っているか
-- [ ] STUDIO の送信処理を click / submit のキャプチャで止められるか
-- [ ] 本番に公開したあとの動作
+- [x] `gtm/container.json` が実際の GTM にインポートできるか（2026-11-21 確認。`container`・`usageContext`・`fingerprint` を足して取り込めるようにした。定数は 1024 文字までなので、ドメインはカスタム JavaScript 変数にした）
+- [x] 実際の STUDIO のフォームで、セレクタ `input[type="email"]` が合っているか（実際のフォームのページで一致）
+- [x] STUDIO の送信処理を click / submit のキャプチャで止められるか（STUDIO 本体とサイト独自のスクリプトの両方より先に止まる）
+- [x] 本番に公開したあとの動作（本番の gtm.js で確認）
 
 ## 作業手順
 
