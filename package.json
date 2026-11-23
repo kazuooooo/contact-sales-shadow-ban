@@ -2,6 +2,7 @@
   "name": "contact-sales-shadow-ban",
   "version": "1.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "GTMだけでフォーム送信を特定ドメインからブロックするスクリプト",
   "scripts": {
